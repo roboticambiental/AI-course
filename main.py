@@ -54,20 +54,21 @@ def verify_token(token: str):
         raise credentials_exception
     return username
 
+
+"""
+Registra un nuevo usuario.
+
+Args:
+    user (User): Los datos del usuario a registrar.
+
+Returns:
+    dict: Un mensaje indicando el éxito del registro.
+
+Raises:
+    HTTPException: Si el usuario ya existe.
+"""
 @app.post("/register")
 def register_user(user: User):
-    """
-    Registra un nuevo usuario.
-
-    Args:
-        user (User): Los datos del usuario a registrar.
-
-    Returns:
-        dict: Un mensaje indicando el éxito del registro.
-
-    Raises:
-        HTTPException: Si el usuario ya existe.
-    """
     if user.username in fake_db['users']:
         raise HTTPException(status_code=400, detail="El usuario ya existe")
 
@@ -79,20 +80,20 @@ def register_user(user: User):
 
     return {"message": "User registered successfully"}
 
+"""
+Inicia sesión un usuario y genera un token.
+
+Args:
+    user (User): Los datos del usuario para iniciar sesión.
+
+Returns:
+    dict: Un mensaje indicando el éxito del inicio de sesión y el token generado.
+
+Raises:
+    HTTPException: Si el usuario no existe o la contraseña es incorrecta.
+"""
 @app.post("/login")
 def login_user(user: User):
-    """
-    Inicia sesión un usuario y genera un token.
-
-    Args:
-        user (User): Los datos del usuario para iniciar sesión.
-
-    Returns:
-        dict: Un mensaje indicando el éxito del inicio de sesión y el token generado.
-
-    Raises:
-        HTTPException: Si el usuario no existe o la contraseña es incorrecta.
-    """
     if user.username not in fake_db['users']:
         raise HTTPException(status_code=400, detail="El usuario no existe")
 
@@ -117,33 +118,43 @@ def bubble_sort(numbers: List[int]) -> List[int]:
                 numbers[j], numbers[j+1] = numbers[j+1], numbers[j]
     return numbers
 
+"""
+Sorts a list of numbers using the bubble sort algorithm.
+
+Args:
+    payload (Payload): The list of numbers to sort.
+    token (str): The authentication token.
+
+Returns:
+    dict: The sorted list of numbers.
+
+Raises:
+    HTTPException: If the authentication token is invalid or not provided.
+
+Example usage:
+curl -X POST "http://localhost:8000/bubble-sort" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <token>" \
+-d '{"numbers": [5, 3, 8, 6, 1, 9]}'
+
+Response:
+{
+    "numbers": [1, 3, 5, 6, 8, 9]
+}
+"""
 @app.post("/bubble-sort")
 def sort_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
-    """
-    Ordena una lista de números usando el algoritmo de ordenamiento de burbuja.
-
-    Args:
-        payload (Payload): La lista de números a ordenar.
-        token (str): El token de autenticación.
-
-    Returns:
-        dict: La lista ordenada de números.
-
-    Raises:
-        HTTPException: Si el token de autenticación es inválido o no fue proporcionado.
-
-    Ejemplo de uso:
-    curl -X POST "http://localhost:8000/bubble-sort" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer <token>" \
-    -d '{"numbers": [5, 3, 8, 6, 1, 9]}'
-
-    Respuesta:
-    {
-        "numbers": [1, 3, 5, 6, 8, 9]
-    }
-    """
     username = verify_token(token)
     sorted_numbers = bubble_sort(payload.numbers)
     return {"numbers": sorted_numbers}
+
+#Considerando la descripción del filtro de pares dada en las líneas 50 a 55 del archivo README.md, y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]} se obtenga un resultado: {"even_numbers": [8, 6]}. Crea un endpoint para la ruta (/filter-even), como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, debe usar el BaseModel Payload
+
+@app.post("/filter-even")
+def filter_even_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    even_numbers = [num for num in payload.numbers if num % 2 == 0]
+    return {"even_numbers": even_numbers}
+
+
 
