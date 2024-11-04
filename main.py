@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
 from typing import List
 from pydantic import BaseModel
 from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordBearer
 import jwt
 from datetime import datetime, timedelta, timezone
 
@@ -15,17 +16,14 @@ app = FastAPI()
 # Configuración para el cifrado de contraseñas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 class Payload(BaseModel):
     numbers: List[int]
 
 class BinarySearchPayload(BaseModel):
     numbers: List[int]
     target: int
-
-# En main.py necesito crear un endpoint para la creación de un usuario.
-#Modifica la línea 49 para que el usuario se almacene en fake_db, dentro del objeto 'users', con su contraseña cifrada.
-#no modifiques el resto del código, sólo lo necesario
-#formatea lo seleccionado para copiar como curl en postman
 
 class User(BaseModel):
     username: str
@@ -40,6 +38,21 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def verify_token(token: str):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except jwt.PyJWTError:
+        raise credentials_exception
+    return username
 
 @app.post("/register")
 def register_user(user: User):
@@ -95,3 +108,42 @@ def login_user(user: User):
     )
 
     return {"message": "Login successful", "access_token": access_token, "token_type": "bearer"}
+
+def bubble_sort(numbers: List[int]) -> List[int]:
+    n = len(numbers)
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if numbers[j] > numbers[j+1]:
+                numbers[j], numbers[j+1] = numbers[j+1], numbers[j]
+    return numbers
+
+@app.post("/bubble-sort")
+def sort_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
+    """
+    Ordena una lista de números usando el algoritmo de ordenamiento de burbuja.
+
+    Args:
+        payload (Payload): La lista de números a ordenar.
+        token (str): El token de autenticación.
+
+    Returns:
+        dict: La lista ordenada de números.
+
+    Raises:
+        HTTPException: Si el token de autenticación es inválido o no fue proporcionado.
+
+    Ejemplo de uso:
+    curl -X POST "http://localhost:8000/bubble-sort" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer <token>" \
+    -d '{"numbers": [5, 3, 8, 6, 1, 9]}'
+
+    Respuesta:
+    {
+        "numbers": [1, 3, 5, 6, 8, 9]
+    }
+    """
+    username = verify_token(token)
+    sorted_numbers = bubble_sort(payload.numbers)
+    return {"numbers": sorted_numbers}
+
