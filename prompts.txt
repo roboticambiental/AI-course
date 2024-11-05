@@ -3,3 +3,22 @@
 #no modifiques el resto del código, sólo lo necesario
 #formatea lo seleccionado para copiar como curl en postman
 #Considerando la descripción del filtro de pares dada en las líneas 50 a 55 del archivo README.md, y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]} se obtenga un resultado: {"even_numbers": [8, 6]}. Crea un endpoint para la ruta (/filter-even), como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, debe usar el BaseModel Payload
+
+#main.py #Considerando la descripción dada en las líneas 56 a 61 del archivo README.md,
+# y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]}
+# se obtenga un resultado: {"sum": 32}.
+# Crea un endpoint para la ruta (/sum-elements), 
+#como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, 
+#debe usar el BaseModel Payload
+
+#main.py #Considerando la descripción dada en las líneas 63 a 66 del archivo README.md,
+# y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]}
+# se obtenga un resultado: {"max": 9}.
+# Crea un endpoint para la ruta (/max-value), 
+#como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, 
+#debe usar el BaseModel Payload
+
+#main.py #Considerando la descripción dada en las líneas 69 a 73 del archivo README.md,
+# Crea un endpoint para la ruta (/binary-search), 
+#como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, 
+#debe usar el BaseModel BinarySearchPayload

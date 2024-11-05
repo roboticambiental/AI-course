@@ -150,11 +150,140 @@ def sort_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
 
 #Considerando la descripción del filtro de pares dada en las líneas 50 a 55 del archivo README.md, y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]} se obtenga un resultado: {"even_numbers": [8, 6]}. Crea un endpoint para la ruta (/filter-even), como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, debe usar el BaseModel Payload
 
+"""
+Filters a list of numbers to only include the even numbers.
+
+Args:
+    payload (Payload): The list of numbers to filter.
+    token (str): The authentication token.
+
+Returns:
+    dict: The list of even numbers.
+
+Raises:
+    HTTPException: If the authentication token is invalid or not provided.
+
+Example usage:
+curl -X POST "http://localhost:8000/filter-even" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <token>" \
+-d '{"numbers": [5, 3, 8, 6, 1, 9]}'
+
+Response:
+{
+    "even_numbers": [8, 6]
+}
+"""
 @app.post("/filter-even")
 def filter_even_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
     username = verify_token(token)
     even_numbers = [num for num in payload.numbers if num % 2 == 0]
     return {"even_numbers": even_numbers}
 
+#Considerando la descripción del filtro de pares dada en las líneas 56 a 61 del archivo README.md, 
+# y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]} 
+# se obtenga un resultado: {"sum": 32}. 
+# Crea un endpoint para la ruta (/sum-elements), como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, debe usar el BaseModel Payload
 
+"""
+Calculates the sum of all numbers in the input list.
 
+Args:
+    payload (Payload): The list of numbers to sum.
+    token (str): The authentication token.
+
+Returns:
+    dict: The sum of all numbers.
+
+Raises:
+    HTTPException: If the authentication token is invalid or not provided.
+
+Example usage:
+curl -X POST "http://localhost:8000/sum-elements" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <token>" \
+-d '{"numbers": [5, 3, 8, 6, 1, 9]}'
+
+Response:
+{
+    "sum": 32
+}
+"""
+@app.post("/sum-elements")
+def sum_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    total_sum = sum(payload.numbers)
+    return {"sum": total_sum}
+
+"""
+Finds the maximum value in the input list of numbers.
+
+Args:
+    payload (Payload): The list of numbers to search.
+    token (str): The authentication token.
+
+Returns:
+    dict: The maximum value found.
+
+Raises:
+    HTTPException: If the authentication token is invalid or not provided.
+
+Example usage:
+curl -X POST "http://localhost:8000/max-value" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <token>" \
+-d '{"numbers": [5, 3, 8, 6, 1, 9]}'
+
+Response:
+{
+    "max": 9
+}
+"""
+@app.post("/max-value")
+def find_max_value(payload: Payload, token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    max_value = max(payload.numbers)
+    return {"max": max_value}
+
+"""
+Performs binary search on a sorted list of numbers.
+
+Args:
+    payload (BinarySearchPayload): The sorted list of numbers and target value.
+    token (str): The authentication token.
+
+Returns:
+    dict: Whether the target was found and its index.
+
+Raises:
+    HTTPException: If the authentication token is invalid or not provided.
+
+Example usage:
+curl -X POST "http://localhost:8000/binary-search" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <token>" \
+-d '{"numbers": [1, 2, 3, 4, 5], "target": 3}'
+
+Response:
+{
+    "found": true,
+    "index": 2
+}
+"""
+@app.post("/binary-search")
+def binary_search(payload: BinarySearchPayload, token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    
+    left = 0
+    right = len(payload.numbers) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if payload.numbers[mid] == payload.target:
+            return {"found": True, "index": mid}
+        elif payload.numbers[mid] < payload.target:
+            left = mid + 1
+        else:
+            right = mid - 1
+            
+    return {"found": False, "index": -1}
