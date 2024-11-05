@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from typing import List
 from pydantic import BaseModel
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer
 import jwt
 from datetime import datetime, timedelta, timezone
 
@@ -15,8 +14,6 @@ app = FastAPI()
 
 # Configuración para el cifrado de contraseñas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 class Payload(BaseModel):
     numbers: List[int]
@@ -132,9 +129,8 @@ Raises:
     HTTPException: If the authentication token is invalid or not provided.
 
 Example usage:
-curl -X POST "http://localhost:8000/bubble-sort" \
+curl -X POST "http://localhost:8000/bubble-sort?token=<token>" \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer <token>" \
 -d '{"numbers": [5, 3, 8, 6, 1, 9]}'
 
 Response:
@@ -143,12 +139,10 @@ Response:
 }
 """
 @app.post("/bubble-sort")
-def sort_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
+def sort_numbers(payload: Payload, token: str):
     username = verify_token(token)
     sorted_numbers = bubble_sort(payload.numbers)
     return {"numbers": sorted_numbers}
-
-#Considerando la descripción del filtro de pares dada en las líneas 50 a 55 del archivo README.md, y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]} se obtenga un resultado: {"even_numbers": [8, 6]}. Crea un endpoint para la ruta (/filter-even), como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, debe usar el BaseModel Payload
 
 """
 Filters a list of numbers to only include the even numbers.
@@ -164,9 +158,8 @@ Raises:
     HTTPException: If the authentication token is invalid or not provided.
 
 Example usage:
-curl -X POST "http://localhost:8000/filter-even" \
+curl -X POST "http://localhost:8000/filter-even?token=<token>" \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer <token>" \
 -d '{"numbers": [5, 3, 8, 6, 1, 9]}'
 
 Response:
@@ -175,15 +168,10 @@ Response:
 }
 """
 @app.post("/filter-even")
-def filter_even_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
+def filter_even_numbers(payload: Payload, token: str):
     username = verify_token(token)
     even_numbers = [num for num in payload.numbers if num % 2 == 0]
     return {"even_numbers": even_numbers}
-
-#Considerando la descripción del filtro de pares dada en las líneas 56 a 61 del archivo README.md, 
-# y considerando que para una entrada: {"numbers": [5, 3, 8, 6, 1, 9]} 
-# se obtenga un resultado: {"sum": 32}. 
-# Crea un endpoint para la ruta (/sum-elements), como está implementado el endpoint (/bubble-sort), es decir que incluya validación de token en el header, debe usar el BaseModel Payload
 
 """
 Calculates the sum of all numbers in the input list.
@@ -199,9 +187,8 @@ Raises:
     HTTPException: If the authentication token is invalid or not provided.
 
 Example usage:
-curl -X POST "http://localhost:8000/sum-elements" \
+curl -X POST "http://localhost:8000/sum-elements?token=<token>" \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer <token>" \
 -d '{"numbers": [5, 3, 8, 6, 1, 9]}'
 
 Response:
@@ -210,7 +197,7 @@ Response:
 }
 """
 @app.post("/sum-elements")
-def sum_numbers(payload: Payload, token: str = Depends(oauth2_scheme)):
+def sum_numbers(payload: Payload, token: str):
     username = verify_token(token)
     total_sum = sum(payload.numbers)
     return {"sum": total_sum}
@@ -229,9 +216,8 @@ Raises:
     HTTPException: If the authentication token is invalid or not provided.
 
 Example usage:
-curl -X POST "http://localhost:8000/max-value" \
+curl -X POST "http://localhost:8000/max-value?token=<token>" \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer <token>" \
 -d '{"numbers": [5, 3, 8, 6, 1, 9]}'
 
 Response:
@@ -240,7 +226,7 @@ Response:
 }
 """
 @app.post("/max-value")
-def find_max_value(payload: Payload, token: str = Depends(oauth2_scheme)):
+def find_max_value(payload: Payload, token: str):
     username = verify_token(token)
     max_value = max(payload.numbers)
     return {"max": max_value}
@@ -259,9 +245,8 @@ Raises:
     HTTPException: If the authentication token is invalid or not provided.
 
 Example usage:
-curl -X POST "http://localhost:8000/binary-search" \
+curl -X POST "http://localhost:8000/binary-search?token=<token>" \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer <token>" \
 -d '{"numbers": [1, 2, 3, 4, 5], "target": 3}'
 
 Response:
@@ -271,7 +256,7 @@ Response:
 }
 """
 @app.post("/binary-search")
-def binary_search(payload: BinarySearchPayload, token: str = Depends(oauth2_scheme)):
+def binary_search(payload: BinarySearchPayload, token: str):
     username = verify_token(token)
     
     left = 0
